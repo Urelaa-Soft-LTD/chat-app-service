@@ -23,6 +23,10 @@ mongoose
     console.log(err.message);
   });
 
+
+app.get('/', (req, res) => {
+  res.send("Chat Server is running");
+})
 app.use("/api/chat/auth", authRoutes);
 app.use("/api/chat/conversations", conversationsRoutes);
 app.use("/api/chat/messages", messageRoutes);
