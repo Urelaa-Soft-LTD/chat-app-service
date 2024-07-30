@@ -23,10 +23,9 @@ mongoose
     console.log(err.message);
   });
 
-
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send("Chat Server is running");
-})
+});
 app.use("/api/chat/auth", authRoutes);
 app.use("/api/chat/conversations", conversationsRoutes);
 app.use("/api/chat/messages", messageRoutes);
@@ -34,9 +33,30 @@ app.use("/api/chat/messages", messageRoutes);
 const server = app.listen(process.env.PORT, () =>
   console.log(`Server started on ${process.env.PORT}`)
 );
+
+// List of allowed origins
+const allowedOrigins = ["http://localhost:3000", "http://example.com"];
+
+// Set up CORS middleware
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (e.g., mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        // If the origin isn't in the list, reject the request
+        return callback(new Error("CORS policy violation"), false);
+      }
+      // If the origin is in the list, allow the request
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
+
 const io = socket(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
   },
 });
