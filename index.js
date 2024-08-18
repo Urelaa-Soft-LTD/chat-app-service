@@ -35,7 +35,7 @@ const server = app.listen(process.env.PORT, () =>
 );
 
 // List of allowed origins
-const allowedOrigins = ["http://localhost:3000", "http://example.com"];
+const allowedOrigins = ["http://localhost:3000", "http://example.com","http://local.partner.cart24.qa:3000","http://local.admin.cart24.qa:3000/"];
 
 // Set up CORS middleware
 app.use(
