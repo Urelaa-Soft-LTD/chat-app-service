@@ -9,37 +9,13 @@ const socket = require("socket.io");
 require("dotenv").config();
 
 
-app.use(express.json());
-
-mongoose
-  .connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("DB Connetion Successfull");
-  })
-  .catch((err) => {
-    console.log(err.message);
-  });
-
-app.get("/", (req, res) => {
-  res.send("Chat Server is running");
-});
-app.use("/api/chat/auth", authRoutes);
-app.use("/api/chat/conversations", conversationsRoutes);
-app.use("/api/chat/messages", messageRoutes);
-
-const server = app.listen(process.env.PORT, () =>
-  console.log(`Server started on ${process.env.PORT}`)
-);
-
 // app.use(
 //   cors({
 //     origin: "*", // Allow all origins
 //     credentials: true, // Allow credentials if needed
 //   })
 // );
+
 
 // List of allowed origins
 const allowedOrigins = [
@@ -68,6 +44,33 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(express.json());
+
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("DB Connetion Successfull");
+  })
+  .catch((err) => {
+    console.log(err.message);
+  });
+
+app.get("/", (req, res) => {
+  res.send("Chat Server is running");
+});
+app.use("/api/chat/auth", authRoutes);
+app.use("/api/chat/conversations", conversationsRoutes);
+app.use("/api/chat/messages", messageRoutes);
+
+const server = app.listen(process.env.PORT, () =>
+  console.log(`Server started on ${process.env.PORT}`)
+);
+
+
 
 const io = socket(server, {
   cors: {
