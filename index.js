@@ -8,7 +8,7 @@ const app = express();
 const socket = require("socket.io");
 require("dotenv").config();
 
-app.use(cors());
+
 app.use(express.json());
 
 mongoose
@@ -34,8 +34,23 @@ const server = app.listen(process.env.PORT, () =>
   console.log(`Server started on ${process.env.PORT}`)
 );
 
+// app.use(
+//   cors({
+//     origin: "*", // Allow all origins
+//     credentials: true, // Allow credentials if needed
+//   })
+// );
+
 // List of allowed origins
-const allowedOrigins = ["http://localhost:3000", "http://example.com","http://local.partner.cart24.qa:3000","http://local.admin.cart24.qa:3000/"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "localhost",
+  "http://local.partner.cart24.qa:3000",
+  "http://local.admin.cart24.qa:3000",
+  "https://www.admin.cart24.qa",
+  "https://www.partner.cart24.qa",
+  "https://www.web.cart24.qa",
+];
 
 // Set up CORS middleware
 app.use(
