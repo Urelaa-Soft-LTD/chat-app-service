@@ -24,7 +24,7 @@ const allowedOrigins = [
   "http://local.partner.cart24.qa:3000",
   "http://local.admin.cart24.qa:3000",
   "https://www.admin.cart24.qa",
-  "https://www.partner.cart24.qa",
+  "https://partner.cart24.qa",
   "https://www.web.cart24.qa",
 ];
 
