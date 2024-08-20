@@ -47,3 +47,19 @@ module.exports.logOut = (req, res, next) => {
     next(ex);
   }
 };
+
+module.exports.deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    await User.delete(req.params.id);
+    return res.status(200).json({ message: 'User deleted successfully' });
+  } catch (ex) {
+    next(ex);
+  }
+};
+
