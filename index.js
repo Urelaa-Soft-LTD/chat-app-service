@@ -5,7 +5,7 @@ const authRoutes = require("./routes/auth");
 const messageRoutes = require("./routes/messages");
 const conversationsRoutes = require("./routes/conversations");
 const app = express();
-const socket = require("socket.io");
+const { initializeSocket } = require("./socket");
 require("dotenv").config();
 
 
@@ -53,7 +53,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("DB Connetion Successfull");
+    console.log("DB Connected Successfully");
   })
   .catch((err) => {
     console.log(err.message);
@@ -70,28 +70,33 @@ const server = app.listen(process.env.PORT, () =>
   console.log(`Server started on ${process.env.PORT}`)
 );
 
+initializeSocket(server, allowedOrigins);
+
+// const io = socket(server, {
+//   cors: {
+//     origin: allowedOrigins,
+//     credentials: true,
+//   },
+// });
+
+// // Export the io object to be accessible in other files
 
 
-const io = socket(server, {
-  cors: {
-    origin: allowedOrigins,
-    credentials: true,
-  },
-});
+// global.onlineUsers = new Map();
+// io.on("connection", (socket) => {
+//   global.chatSocket = socket;
+//   socket.on("add-user", (userId) => {
+//     onlineUsers.set(userId, socket.id);
+//     console.log("user added --> ", onlineUsers);
+//   });
 
-global.onlineUsers = new Map();
-io.on("connection", (socket) => {
-  global.chatSocket = socket;
-  socket.on("add-user", (userId) => {
-    onlineUsers.set(userId, socket.id);
-    console.log("user added --> ", onlineUsers);
-  });
+//   socket.on("send-msg", (data) => {
+//     console.log("send", data);
+//     const sendUserSocket = onlineUsers.get(data.from);
+//     if (sendUserSocket) {
+//       io.emit("msg-recieve", data);
+//     }
+//   });
+// });
 
-  socket.on("send-msg", (data) => {
-    console.log("send", data);
-    const sendUserSocket = onlineUsers.get(data.from);
-    if (sendUserSocket) {
-      io.emit("msg-recieve", data);
-    }
-  });
-});
+// module.exports = io;

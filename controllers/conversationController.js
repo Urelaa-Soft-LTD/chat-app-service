@@ -1,4 +1,5 @@
 const Conversations = require("../models/conversationModel");
+const { getIoInstance } = require("../socket");
 
 module.exports.createConversation = async (req, res, next) => {
   try {
@@ -10,7 +11,12 @@ module.exports.createConversation = async (req, res, next) => {
       hasConversation = await Conversations.create({ users });
     }
     hasConversation = await hasConversation.populate("users");
-    return res.json({ status: true, ...hasConversation._doc });
+
+    const result  = { status: true, ...hasConversation._doc };
+    // while conversation created
+    const io = getIoInstance();
+    io.emit("new-conversation", result);
+    return res.json(result);
   } catch (ex) {
     next(ex);
   }
