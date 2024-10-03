@@ -48,6 +48,23 @@ module.exports.logOut = (req, res, next) => {
   }
 };
 
+module.exports.updateUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found', status: false });
+    }
+
+    return res.json({ status: true, user });
+  } catch (ex) {
+    next(ex);
+  }
+}
+
 module.exports.deleteUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);

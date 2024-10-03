@@ -4,6 +4,7 @@ const {
   getAllUsers,
   logOut,
   deleteUser,
+  updateUser,
 } = require("../controllers/userController");
 
 const router = require("express").Router();
@@ -13,5 +14,6 @@ router.post("/register", register);
 router.get("/allusers/:id", getAllUsers);
 router.get("/logout/:id", logOut);
 router.get("/delete/:id", deleteUser);
+router.put('/update/:id', updateUser);
 
 module.exports = router;
