@@ -2,6 +2,61 @@ const socket = require("socket.io");
 const Conversations = require("./models/conversationModel");
 let io; // Declare io so it can be accessed outside the initialization function
 
+/**
+ * @swagger
+ * tags:
+ *   name: Socket
+ *   description: Socket.IO operations
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     SocketMessage:
+ *       type: object
+ *       required:
+ *         - conversationId
+ *         - from
+ *         - message
+ *       properties:
+ *         conversationId:
+ *           type: string
+ *           description: The ID of the conversation
+ *         from:
+ *           type: string
+ *           description: The ID of the sender
+ *         message:
+ *           type: string
+ *           description: The content of the message
+ *         messageId:
+ *           type: string
+ *           description: The ID of the message
+ */
+
+/**
+ * @swagger
+ * /socket.io:
+ *   get:
+ *     summary: Socket.IO endpoint
+ *     tags: [Socket]
+ *     description: |
+ *       This is the main Socket.IO endpoint. Clients should connect to this endpoint to establish a WebSocket connection.
+ *       
+ *       Available events:
+ *       - `add-user`: Add a user to the online users list
+ *       - `send-msg`: Send a message to other users in a conversation
+ *       - `disconnect`: Handle user disconnection
+ *       
+ *       Emitted events:
+ *       - `msg-receive`: Receive a message from another user
+ *       - `update-unread-count`: Update the unread message count for a conversation
+ *       - `msg-sent`: Confirmation that a message was sent successfully
+ *     responses:
+ *       101:
+ *         description: Switching Protocols to WebSocket
+ */
+
 const initializeSocket = (server, allowedOrigins) => {
   io = socket(server, {
     cors: {
@@ -16,13 +71,51 @@ const initializeSocket = (server, allowedOrigins) => {
     global.chatSocket = socket;
     console.log("New user connected");
 
-    // Add user to onlineUsers
+    /**
+     * @swagger
+     * /socket.io:
+     *   post:
+     *     summary: Add a user to online users
+     *     tags: [Socket]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - userId
+     *             properties:
+     *               userId:
+     *                 type: string
+     *                 description: The ID of the user to add
+     *     responses:
+     *       200:
+     *         description: User added successfully
+     */
     socket.on("add-user", (userId) => {
       onlineUsers.set(userId, socket.id);
       console.log("User added -->", onlineUsers);
     });
 
-    // Handle sending a message
+    /**
+     * @swagger
+     * /socket.io:
+     *   post:
+     *     summary: Send a message event
+     *     tags: [Socket]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/SocketMessage'
+     *     responses:
+     *       200:
+     *         description: Message sent successfully
+     *       400:
+     *         description: Error sending message
+     */
     socket.on("send-msg", async (data) => {
       console.log("send", data);
       const { conversationId, from } = data;
@@ -61,7 +154,16 @@ const initializeSocket = (server, allowedOrigins) => {
       }
     });
 
-    // Handle disconnect
+    /**
+     * @swagger
+     * /socket.io:
+     *   post:
+     *     summary: Handle user disconnection
+     *     tags: [Socket]
+     *     responses:
+     *       200:
+     *         description: User disconnected successfully
+     */
     socket.on("disconnect", () => {
       console.log("User disconnected");
       for (let [userId, socketId] of onlineUsers.entries()) {

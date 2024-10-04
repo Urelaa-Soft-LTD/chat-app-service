@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 const authRoutes = require("./routes/auth");
 const messageRoutes = require("./routes/messages");
 const conversationsRoutes = require("./routes/conversations");
@@ -8,7 +10,29 @@ const app = express();
 const { initializeSocket } = require("./socket");
 require("dotenv").config();
 
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Chat API",
+      version: "1.0.0",
+      description: "API documentation for the Chat application",
+    },
+    servers: [
+      {
+        url: `http://localhost:${process.env.PORT}`,
+        description: "Development server",
+      },
+    ],
+  },
+  apis: ["./routes/*.js", "./socket.js"], // Path to the API routes files
+};
 
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // app.use(
 //   cors({
 //     origin: "*", // Allow all origins
