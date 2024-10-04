@@ -3,20 +3,37 @@ const Conversations = require("../models/conversationModel");
 
 module.exports.getMessages = async (req, res, next) => {
   try {
-    const { from, conversationId } = req.body;
+    const { from, conversationId, page = 1, limit = 30 } = req.body;
 
-    const messages = await Messages.find({
-      conversationId: conversationId,
-    }).sort({ createdAt: 1 });
+    // Calculate the number of documents to skip
+    const skip = (page - 1) * limit;
 
-    if (messages.length > 0) {
-      const lastMessageId = messages[messages.length - 1]._id;
+    // Fetch messages with pagination, sorted from newest to oldest
+    const messages = await Messages.find({ conversationId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Reverse the array to display messages from oldest to newest
+    const orderedMessages = messages.reverse();
+
+    // Get total count of messages for this conversation
+    const totalCount = await Messages.countDocuments({ conversationId });
+
+    if (orderedMessages.length > 0 && page === 1) {
+      const lastMessageId = orderedMessages[orderedMessages.length - 1]._id;
       await Conversations.findByIdAndUpdate(conversationId, {
         $set: { [`lastReadMessage.${from}`]: lastMessageId }
       });
     }
 
-    res.json(messages);
+    res.json({
+      messages: orderedMessages,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / limit),
+      hasMore: skip + orderedMessages.length < totalCount
+    });
   } catch (ex) {
     next(ex);
   }

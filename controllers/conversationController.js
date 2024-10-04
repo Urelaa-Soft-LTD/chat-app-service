@@ -1,5 +1,6 @@
 const Conversations = require("../models/conversationModel");
 const Messages = require("../models/messageModel");
+const mongoose = require("mongoose");
 const { getIoInstance } = require("../socket");
 
 module.exports.createConversation = async (req, res, next) => {
@@ -12,7 +13,6 @@ module.exports.createConversation = async (req, res, next) => {
       conversation = await Conversations.create({ users });
     }
     conversation = await conversation.populate("users");
-
     const result = { status: true, ...conversation._doc };
     const io = getIoInstance();
     io.emit("new-conversation", result);
@@ -37,8 +37,15 @@ module.exports.getAllConversation = async (req, res, next) => {
         from: { $ne: userId }
       });
 
+      // Filter out the user that matches userId
+      const filteredUsers = conversation.users.filter(user => user._id.toString() !== userId);
+
+      // Determine whether to return an object or an array
+      // const usersData = filteredUsers.length === 1 ? filteredUsers[0] : filteredUsers;
+
       return {
         ...conversation._doc,
+        users: filteredUsers,
         unreadCount
       };
     }));
@@ -51,7 +58,7 @@ module.exports.getAllConversation = async (req, res, next) => {
 
 module.exports.markConversationAsRead = async (req, res, next) => {
   try {
-    const { conversationId, userId } = req.params;
+    const {userId, conversationId,  } = req.params;
 
     const lastMessage = await Messages.findOne({ conversationId }).sort({ createdAt: -1 });
 
@@ -62,6 +69,30 @@ module.exports.markConversationAsRead = async (req, res, next) => {
     }
 
     res.json({ status: true, message: "Conversation marked as read" });
+  } catch (ex) {
+    next(ex);
+  }
+};
+
+module.exports.deleteConversation = async (req, res, next) => {
+  try {
+    const { conversationId } = req.params;
+
+    // Delete the conversation
+    const deletedConversation = await Conversations.findByIdAndDelete(conversationId);
+
+    if (!deletedConversation) {
+      return res.status(404).json({ status: false, message: "Conversation not found" });
+    }
+
+    // Delete all messages associated with the conversation
+    await Messages.deleteMany({ conversationId });
+
+    // Emit a socket event to notify clients about the deleted conversation
+    const io = getIoInstance();
+    io.emit("conversation-deleted", { conversationId });
+
+    res.json({ status: true, message: "Conversation and associated messages deleted successfully" });
   } catch (ex) {
     next(ex);
   }

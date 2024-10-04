@@ -1,9 +1,14 @@
-const { createConversation, getAllConversation, markConversationAsRead } = require("../controllers/conversationController");
+const {
+  createConversation,
+  getAllConversation,
+  markConversationAsRead,
+  deleteConversation,
+} = require("../controllers/conversationController");
 const router = require("express").Router();
 
 router.post("/create", createConversation);
 router.get("/all/:id", getAllConversation);
-router.put("/:conversationId/:userId/read", markConversationAsRead);
-
+router.delete("/delete/:conversationId", deleteConversation);
+router.put("/mark-read/:userId/:conversationId", markConversationAsRead);
 
 module.exports = router;

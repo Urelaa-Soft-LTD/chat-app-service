@@ -14,11 +14,12 @@ const MessageSchema = mongoose.Schema(
     },
     message: {
       type: String,
-      required: true,
+      default: "",
     },
     type: {
       type: String,
       default: "text",
+      enum: ["text", "image", "video", "audio"],
     },
     files: {
       type: Array,
