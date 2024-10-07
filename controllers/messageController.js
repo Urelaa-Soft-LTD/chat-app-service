@@ -3,7 +3,7 @@ const Conversations = require("../models/conversationModel");
 
 module.exports.getMessages = async (req, res, next) => {
   try {
-    const { from, conversationId, page = 1, limit = 30 } = req.body;
+    const { from, conversationId, page = 1, limit = 20 } = req.body;
 
     // Calculate the number of documents to skip
     const skip = (page - 1) * limit;
