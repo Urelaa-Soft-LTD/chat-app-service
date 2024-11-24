@@ -96,31 +96,4 @@ const server = app.listen(process.env.PORT, () =>
 
 initializeSocket(server, allowedOrigins);
 
-// const io = socket(server, {
-//   cors: {
-//     origin: allowedOrigins,
-//     credentials: true,
-//   },
-// });
 
-// // Export the io object to be accessible in other files
-
-
-// global.onlineUsers = new Map();
-// io.on("connection", (socket) => {
-//   global.chatSocket = socket;
-//   socket.on("add-user", (userId) => {
-//     onlineUsers.set(userId, socket.id);
-//     console.log("user added --> ", onlineUsers);
-//   });
-
-//   socket.on("send-msg", (data) => {
-//     console.log("send", data);
-//     const sendUserSocket = onlineUsers.get(data.from);
-//     if (sendUserSocket) {
-//       io.emit("msg-recieve", data);
-//     }
-//   });
-// });
-
-// module.exports = io;
