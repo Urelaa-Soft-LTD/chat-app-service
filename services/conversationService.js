@@ -1,7 +1,7 @@
 const Conversations = require("../models/conversationModel");
 const Messages = require("../models/messageModel");
 const mongoose = require("mongoose");
-
+// const { getIoInstance } = require("../socket");
 
 function getLastReadMessageId(conversation, userId) {
   try {
@@ -13,7 +13,6 @@ function getLastReadMessageId(conversation, userId) {
     return new mongoose.Types.ObjectId(0);
   }
 }
-
 
 async function getUnreadCount(conversationId, lastReadMessageId, userId) {
   try {
@@ -27,7 +26,6 @@ async function getUnreadCount(conversationId, lastReadMessageId, userId) {
     return 0;
   }
 }
-
 
 function sortConversations(conversations) {
   return conversations.sort((a, b) => {
@@ -47,9 +45,11 @@ async function createConversation(users) {
   }
 
   conversation = await conversation.populate("users");
+
+  // const io = getIoInstance();
+  // io.emit("new-conversation", conversation);
   return { status: true, ...conversation._doc };
 }
-
 
 async function getAllConversations(userId, searchName) {
   if (!userId) {
@@ -119,7 +119,6 @@ async function getAllConversations(userId, searchName) {
   return sortConversations(conversationsWithUnreadCount);
 }
 
-
 async function markConversationAsRead(userId, conversationId) {
   const lastMessage = await Messages.findOne({ conversationId }).sort({
     createdAt: -1,
@@ -134,7 +133,6 @@ async function markConversationAsRead(userId, conversationId) {
   return { status: true, message: "Conversation marked as read" };
 }
 
-
 async function deleteConversation(conversationId) {
   const deletedConversation = await Conversations.findByIdAndDelete(
     conversationId
@@ -145,11 +143,17 @@ async function deleteConversation(conversationId) {
   }
 
   await Messages.deleteMany({ conversationId });
-
+  // const io = getIoInstance();
+  // io.emit("conversation-deleted", { conversationId });
   return {
     status: true,
     message: "Conversation and associated messages deleted successfully",
   };
+}
+
+async function getConversationById(conversationId) {
+  const conversation = await Conversations.findById(conversationId);
+  return conversation;
 }
 
 module.exports = {
@@ -157,6 +161,7 @@ module.exports = {
   getAllConversations,
   markConversationAsRead,
   deleteConversation,
+  getConversationById,
 };
 
 // // services/conversationService.js
