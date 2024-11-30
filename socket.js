@@ -30,11 +30,12 @@ const initializeSocket = (server, allowedOrigins) => {
     global.chatSocket = socket;
     console.log("New user connected:", socket.id);
 
-    socket.on("add-user", (userId, deviceType = "web") => {
+    socket.on("add-user", (userId, deviceType) => {
       const userSessions = onlineUsers.get(userId) || new Map();
-      userSessions.set(socket.id, { deviceType });
+      userSessions.set(socket.id, { deviceType: deviceType ?? 'web' });
       onlineUsers.set(userId, userSessions);
       console.log("User added -->", userId, deviceType);
+      console.log("connected online users", onlineUsers)
     });
     
     socket.on("send-msg", async (data) => {
@@ -126,7 +127,8 @@ const initializeSocket = (server, allowedOrigins) => {
             console.log("All chat id for in convo", userId);
             if (userId.toString() !== from) {
               const userSessions = onlineUsers.get(userId.toString());
-              console.log("Sessions", userSessions);
+              console.log("Sessions:", userSessions);
+              console.log("ALL Online user:", onlineUsers);
               if (userSessions) {
                 userSessions.forEach((_session, socketId) => {
                   io.to(socketId).emit("msg-receive", {
