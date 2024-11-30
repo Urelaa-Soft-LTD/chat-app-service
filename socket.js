@@ -70,6 +70,8 @@ const initializeSocket = (server, allowedOrigins) => {
           return;
         }
 
+        console.log("sender conversation".data);
+
         // Handle auto-message when qid is present
         if (restData?.qid) {
           // Fetch suggestion answer based on qid
@@ -121,8 +123,10 @@ const initializeSocket = (server, allowedOrigins) => {
         } else {
           // Regular message handling for non-auto-reply messages
           conversation.users.forEach((userId) => {
+            console.log("All chat id for in convo", userId);
             if (userId.toString() !== from) {
               const userSessions = onlineUsers.get(userId.toString());
+              console.log("Sessions", userSessions);
               if (userSessions) {
                 userSessions.forEach((_session, socketId) => {
                   io.to(socketId).emit("msg-receive", {
