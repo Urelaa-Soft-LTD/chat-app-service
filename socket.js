@@ -32,12 +32,12 @@ const initializeSocket = (server, allowedOrigins) => {
 
     socket.on("add-user", (userId, deviceType) => {
       const userSessions = onlineUsers.get(userId) || new Map();
-      userSessions.set(socket.id, { deviceType: deviceType ?? 'web' });
+      userSessions.set(socket.id, { deviceType: deviceType ?? "web" });
       onlineUsers.set(userId, userSessions);
       console.log("User added -->", userId, deviceType);
-      console.log("connected online users", onlineUsers)
+      console.log("connected online users", onlineUsers);
     });
-    
+
     socket.on("send-msg", async (data) => {
       const {
         conversationId,
@@ -45,15 +45,22 @@ const initializeSocket = (server, allowedOrigins) => {
         message,
         type = "text",
         files = [],
+        localization = "eng",
         ...restData
       } = data;
+
+      const _message = message[localization]
+        ? message[localization]
+        : message.eng
+        ? message.eng
+        : message;
 
       try {
         // Save the original message
         const savedMessage = await messageService.addMessage({
           from,
           conversationId,
-          message,
+          message: _message,
           type,
           files,
         });
@@ -86,7 +93,7 @@ const initializeSocket = (server, allowedOrigins) => {
           );
 
           // If suggestion found and other users exist
-          if (suggestionResponse?.reply && otherUsers.length > 0) {
+          if (suggestionResponse?.reply?.eng && otherUsers.length > 0) {
             // Choose the first other user as the auto-reply sender
             const autoReplyFrom = otherUsers[0].toString();
 
@@ -94,7 +101,11 @@ const initializeSocket = (server, allowedOrigins) => {
             const autoSavedMessage = await messageService.addMessage({
               from: autoReplyFrom,
               conversationId,
-              message: suggestionResponse.reply,
+              message: suggestionResponse?.reply[localization]
+                ? suggestionResponse?.reply[localization]
+                : suggestionResponse?.reply?.eng
+                ? suggestionResponse?.reply?.eng
+                : "",
               type: "text", // You might want to adjust this based on your requirements
               files: [],
             });
@@ -107,7 +118,11 @@ const initializeSocket = (server, allowedOrigins) => {
                 io.to(socketId).emit("msg-receive", {
                   from: autoReplyFrom,
                   conversationId,
-                  message: suggestionResponse.reply,
+                  message: suggestionResponse.reply[localization]
+                    ? suggestionResponse?.reply[localization]
+                    : suggestionResponse?.reply?.eng
+                    ? suggestionResponse?.reply?.eng
+                    : "",
                   type: "text",
                   messageId: autoSavedMessage._id,
                   createdAt: autoSavedMessage.createdAt,
